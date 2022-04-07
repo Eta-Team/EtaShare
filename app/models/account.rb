@@ -21,7 +21,7 @@ module EtaShare
     def to_json(options = {})
       JSON(
         {
-          type: 'document',
+          type: 'account',
           id:,
           username:,
           password:
