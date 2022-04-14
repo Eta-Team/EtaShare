@@ -3,56 +3,90 @@
 require 'roda'
 require 'json'
 
-require_relative '../models/account'
-
 module EtaShare
-  # Web controller for EtaShare API
+  # Web controller for Credence API
   class Api < Roda
-    plugin :environments
     plugin :halt
 
-    configure do
-      Account.setup
-    end
-
-    route do |routing| # rubocop:disable Metrics/BlockLength
+    route do |routing|
       response['Content-Type'] = 'application/json'
 
       routing.root do
-        response.status = 200
-        { message: 'EtaShareAPI up at /api/v1' }.to_json
+        { message: 'EtaShare up at /api/v1' }.to_json
       end
 
-      routing.on 'api' do
-        routing.on 'v1' do
-          routing.on 'accounts' do
-            # GET api/v1/accounts/[id]
-            routing.get String do |id|
-              response.status = 200
-              Account.find(id).to_json
-            rescue StandardError
-              routing.halt 404, { message: 'Account not found' }.to_json
-            end
+      @api_root = 'api/v1'
+      routing.on @api_root do
+        routing.on 'links' do
+          @link_route = "#{@api_root}/links"
 
-            # GET api/v1/accounts
-            routing.get do
-              response.status = 200
-              output = { account_ids: Account.all }
-              JSON.pretty_generate(output)
-            end
+          routing.on String do |link_id|
+            routing.on 'files' do
+              @file_route = "#{@api_root}/links/#{link_id}/files"
+              # GET api/v1/links/[link_id]/files/[file_id]
+              routing.get String do |file_id|
+                # SELECT * FROM FILES WHERE `link_id` = `file_id`
+                doc = File.where(link_id:, id: file_id).first
+                doc ? doc.to_json : raise('File not found')
+              rescue StandardError => e
+                routing.halt 404, { message: e.message }.to_json
+              end
 
-            # POST api/v1/accounts
-            routing.post do
-              new_data = JSON.parse(routing.body.read)
-              new_doc = Account.new(new_data)
+              # GET api/v1/links/[link_id]/files
+              routing.get do
+                output = { data: Link.first(id: link_id).files }
+                JSON.pretty_generate(output)
+              rescue StandardError
+                routing.halt 404, message: 'Could not find files'
+              end
 
-              if new_doc.save
-                response.status = 201
-                { message: 'Account saved', id: new_doc.id }.to_json
-              else
-                routing.halt 400, { message: 'Could not save account' }.to_json
+              # POST api/v1/links/[ID]/files
+              routing.post do
+                new_data = JSON.parse(routing.body.read)
+                link = Link.first(id: link_id)
+                new_file = link.add_file(new_data)
+
+                if new_file
+                  response.status = 201
+                  response['Location'] = "#{@file_route}/#{new_file.id}"
+                  { message: 'File saved', data: new_file }.to_json
+                else
+                  routing.halt 400, 'Could not save file'
+                end
+
+              rescue StandardError
+                routing.halt 500, { message: 'Database error' }.to_json
               end
             end
+
+            # GET api/v1/links/[ID]
+            routing.get do
+              link = Link.first(id: link_id)
+              link ? link.to_json : raise('Link not found')
+            rescue StandardError => e
+              routing.halt 404, { message: e.message }.to_json
+            end
+          end
+
+          # GET api/v1/links
+          routing.get do
+            output = { data: Link.all }
+            JSON.pretty_generate(output)
+          rescue StandardError
+            routing.halt 404, { message: 'Could not find links' }.to_json
+          end
+
+          # POST api/v1/links
+          routing.post do
+            new_data = JSON.parse(routing.body.read)
+            new_link = Link.new(new_data)
+            raise('Could not save link') unless new_link.save
+
+            response.status = 201
+            response['Location'] = "#{@link_route}/#{new_link.id}"
+            { message: 'Link saved', data: new_link }.to_json
+          rescue StandardError => e
+            routing.halt 400, { message: e.message }.to_json
           end
         end
       end

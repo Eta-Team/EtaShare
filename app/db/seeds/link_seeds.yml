@@ -1,0 +1,8 @@
+- title: "Service Contract"
+  description: "The 2022 contract between company.inc and the othercompany.inc "
+  is_clicked: 1
+  valid_period: 10
+- title: "Sales Receipt"
+  description: "Proof of the 2020 goods sales"
+  is_clicked: 0
+  valid_period: 20

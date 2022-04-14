@@ -1,0 +1,5 @@
+---
+- name: "confidential.pdf"
+  description: "Service contracts"
+- name: "secret.pdf"
+  description: "Sales receipts"
