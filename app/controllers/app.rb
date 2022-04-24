@@ -45,17 +45,16 @@ module EtaShare
                 new_data = JSON.parse(routing.body.read)
                 link = Link.first(id: link_id)
                 new_file = link.add_file(new_data)
+                raise 'Could not save file' unless new_file
 
-                if new_file
-                  response.status = 201
-                  response['Location'] = "#{@file_route}/#{new_file.id}"
-                  { message: 'File saved', data: new_file }.to_json
-                else
-                  routing.halt 400, 'Could not save file'
-                end
-
-              rescue StandardError
-                routing.halt 500, { message: 'Database error' }.to_json
+                response.status = 201
+                response['Location'] = "#{@file_route}/#{new_file.id}"
+                { message: 'File saved', data: new_file }.to_json
+              rescue Sequel::MassAssignmentRestriction
+                Api.logger.warn "MASS-ASSIGNMENT: #{new_data.keys}"
+                routing.halt 400, { message: 'Illegal Attributes' }.to_json
+              rescue StandardError => e
+                routing.halt 500, { message: e.message }.to_json
               end
             end
 
@@ -85,6 +84,9 @@ module EtaShare
             response.status = 201
             response['Location'] = "#{@link_route}/#{new_link.id}"
             { message: 'Link saved', data: new_link }.to_json
+          rescue Sequel::MassAssignmentRestriction
+            Api.logger.warn "MASS-ASSIGNMENT: #{new_data.keys}"
+            routing.halt 400, { message: 'Illegal Attributes' }.to_json
           rescue StandardError => e
             routing.halt 400, { message: e.message }.to_json
           end

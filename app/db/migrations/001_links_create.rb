@@ -8,9 +8,9 @@ Sequel.migration do
       primary_key :id
 
       String      :title, unique: true, null: false
-      String      :description, unique: true, null: false
-      Integer     :is_clicked, null: false
-      Integer     :valid_period
+      String      :description_secure, null: false, default: ''
+      String      :is_clicked, null: false, default: '0' # To be converted to Integer '0' -> Not clicked '1' -> Clicked
+      String      :valid_period_secure # To be converted to Integer as well -> Will represent the amount of days
 
       DateTime    :created_at
       DateTime    :updated_at

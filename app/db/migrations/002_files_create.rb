@@ -5,11 +5,11 @@ require 'sequel'
 Sequel.migration do
   change do
     create_table(:files) do
-      primary_key   :id
+      uuid          :id, primary_key: true
       foreign_key   :link_id, table: :links
 
       String        :name, null: false
-      String        :description, null: false, default: ''
+      String        :description_secure, null: false, default: ''
 
       DateTime      :created_at
       DateTime      :updated_at

@@ -12,7 +12,7 @@ end
 
 desc 'Test all the specs'
 Rake::TestTask.new(:spec) do |t|
-  t.pattern = 'spec/*_spec.rb'
+  t.pattern = 'spec/**/*_spec.rb'
   t.warning = false
 end
 
@@ -42,11 +42,15 @@ end
 
 namespace :db do
   task :load do
-    require_app(nil) # loads config code files only
+    require_app(nil) # load nothing by default
     require 'sequel'
 
     Sequel.extension :migration
     @app = EtaShare::Api
+  end
+
+  task :load_models do
+    require_app('models')
   end
 
   desc 'Run migrations'
@@ -56,8 +60,8 @@ namespace :db do
   end
 
   desc 'Destroy data in database; maintain tables'
-  task delete: :load do
-    EtaShare::Api.DB.dataset.destroy
+  task delete: :load_models do
+    EtaShare::Link.dataset.destroy
   end
 
   desc 'Delete dev or test database file'
@@ -70,5 +74,13 @@ namespace :db do
     db_filename = "app/db/store/#{EtaShare::Api.environment}.db"
     FileUtils.rm(db_filename)
     puts "Deleted #{db_filename}"
+  end
+end
+
+namespace :newkey do
+  desc 'Create sample cryptographic key for database'
+  task :db do
+    require_app('lib')
+    puts "DB_KEY: #{SecureDB.generate_key}"
   end
 end
