@@ -9,10 +9,13 @@ require 'yaml'
 require_relative 'test_load_all'
 
 def wipe_database
-  app.DB[:files].delete
-  app.DB[:links].delete
+  EtaShare::File.map(&:destroy)
+  EtaShare::Link.map(&:destroy)
+  EtaShare::Account.map(&:destroy)
 end
 
-DATA = {} # rubocop:disable Style/MutableConstant
-DATA[:files] = YAML.safe_load File.read('app/db/seeds/file_seeds.yml')
-DATA[:links] = YAML.safe_load File.read('app/db/seeds/link_seeds.yml')
+DATA = {
+  accounts: YAML.safe_load(File.read('app/db/seeds/accounts_seeds.yml')),
+  files: YAML.safe_load(File.read('app/db/seeds/files_seeds.yml')),
+  links: YAML.safe_load(File.read('app/db/seeds/link_seeds.yml'))
+}.freeze

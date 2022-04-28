@@ -8,7 +8,7 @@ module EtaShare
   class Link < Sequel::Model
     many_to_one :owner, class: :'EtaShare::Account'
 
-    many_to_many :accesses,
+    many_to_many :accessors,
                  class: :'EtaShare::Account',
                  join_table: :accounts_links,
                  left_key: :link_id, right_key: :accessor_id

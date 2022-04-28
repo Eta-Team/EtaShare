@@ -13,9 +13,9 @@ describe 'Test AddAccessorToLink service' do
     link_data = DATA[:links].first
 
     @sender = EtaShare::Account.all[0]
-    @accessoor = EtaShare::Account.all[1]
-    @link = EtaShare::CreateLinkForSender.call(
-      sender_id: @sender.id, link_data:
+    @accessor = EtaShare::Account.all[1]
+    @link = EtaShare::CreateLinkForOwner.call(
+      owner_id: @sender.id, link_data:
     )
   end
 

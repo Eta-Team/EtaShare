@@ -11,7 +11,7 @@ module EtaShare
     many_to_many :accesses,
                  class: :'EtaShare::Link',
                  join_table: :accounts_links,
-                 left_key: :accesses_id, right_key: :link_id
+                 left_key: :accessor_id, right_key: :link_id
 
     plugin :association_dependencies,
            owned_links: :destroy,

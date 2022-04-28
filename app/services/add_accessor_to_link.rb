@@ -11,7 +11,7 @@ module EtaShare
     def self.call(email:, link_id:)
       accessor = Account.first(email:)
       link = Link.first(id: link_id)
-      raise(SenderNotAccessorError) if link.sender.id == accessor.id
+      raise(SenderNotAccessorError) if link.owner.id == accessor.id
 
       link.add_accessor(accessor)
     end
