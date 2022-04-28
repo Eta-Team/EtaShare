@@ -44,8 +44,6 @@ module EtaShare
           email:
         }, options
       )
-      
     end
   end
- 
 end
