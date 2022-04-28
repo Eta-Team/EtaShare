@@ -1,0 +1,9 @@
+---
+- name: confidential.pdf
+  description: Sales receipt
+- name: credentials.yml
+  description: credentials file
+- name: secrets.doc
+  description: Service contract
+- name: contract.pdf
+  description: access tokens
