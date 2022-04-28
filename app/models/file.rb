@@ -9,6 +9,7 @@ module EtaShare
     many_to_one :link
 
     plugin :uuid, field: :id
+    plugin :timestamps, update_on_create: true
 
     plugin :timestamps
     plugin :whitelist_security

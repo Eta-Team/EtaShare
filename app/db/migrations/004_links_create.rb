@@ -6,6 +6,7 @@ Sequel.migration do
   change do
     create_table(:links) do
       primary_key :id
+      foreign_key :owner_id, :accounts
 
       String      :title, unique: true, null: false
       String      :description_secure, null: false, default: ''
