@@ -6,7 +6,6 @@ require_relative './app'
 module EtaShare
   # Web controller for EtaShare API
   class Api < Roda
-    # rubocop:disable Metrics/BlockLength
     route('links') do |routing|
       @link_route = "#{@api_root}/links"
 
@@ -83,6 +82,5 @@ module EtaShare
         routing.halt 500, { message: 'Unknown server error' }.to_json
       end
     end
-    # rubocop:enable Metrics/BlockLength
   end
 end
