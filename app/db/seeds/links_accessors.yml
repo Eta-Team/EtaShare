@@ -1,8 +1,8 @@
 ---
-- link_desc: Netflix Account Credentials
+- link_title: Sales Receipts
   accessor_email:
-    - lilly@nctu.edu.tw
-    - gal09@gmail.com
-- link_desc: Amazon Account Credential
+    - bet@nctu.edu.tw
+- link_title: Passport
   accessor_email:
-    - bill00@gmail.com
+    - gal@nctu.edu.tw
+    - car@gmail.com
