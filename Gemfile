@@ -18,23 +18,26 @@ gem 'rbnacl', '~>7'
 # Database
 gem 'hirb'
 gem 'sequel', '~>5'
-group :development, :test do
-  gem 'sqlite3'
-end
-
-# Performance
-gem 'rubocop-performance'
 
 # Testing
 group :test do
   gem 'minitest'
   gem 'minitest-rg'
-  gem 'rack-test'
 end
 
-# Debugging
-gem 'pry'
-gem 'rerun'
+# Development
+group :development do
+  gem 'pry'
+  gem 'rerun'
+  gem 'rubocop'
+  gem 'rubocop-performance'
+end
+
+group :development, :test do
+  gem 'rack-test'
+  gem 'sequel-seed'
+  gem 'sqlite3'
+end
 
 # Quality
 gem 'rubocop'

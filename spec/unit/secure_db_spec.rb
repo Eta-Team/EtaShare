@@ -17,7 +17,7 @@ describe 'Test SecureDB Class' do
   end
 
   it 'SECURITY: should decrypt non-ASCII characters' do
-    test_data = '我的名字是雷松亞'
+    test_data = '我的名字是馬志瑞'
     text_sec = SecureDB.encrypt(test_data)
     test_decrypted = SecureDB.decrypt(text_sec)
     _(test_decrypted).must_equal test_data
