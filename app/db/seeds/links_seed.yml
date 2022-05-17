@@ -6,3 +6,7 @@
   description: "Proof of the 2020 goods sales"
   is_clicked: "0"
   valid_period: "20"
+- title: "Passport"
+  description: "Valid Passport of Bethany"
+  is_clicked: "0"
+  valid_period: "20"
