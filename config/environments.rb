@@ -31,7 +31,8 @@ module EtaShare
       def self.logger = LOGGER
 
       # Load crypto keys
-      SecureDB.setup(ENV.delete('DB_KEY'))
+      SecureDB.setup(ENV.delete('DB_KEY')) # Load crypto key
+      AuthToken.setup(ENV.fetch('MSG_KEY')) # Load crypto key
     end
     # rubocop:enable Lint/ConstantDefinitionInBlock
 
