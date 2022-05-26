@@ -10,15 +10,36 @@ describe 'Test Link Handling' do
   end
 
   describe 'Getting links' do
-    it 'HAPPY: should be able to get list of all links' do
-      EtaShare::Link.create(DATA[:links][0])
-      EtaShare::Link.create(DATA[:links][1])
+    describe 'Getting list of all links' do
+      before do
+        @account_data = DATA[:accounts][0]
+        account = EtaShare::Account.create(@account_data)
+        account.add_owned_link(DATA[:links][0])
+        account.add_owned_link(DATA[:links][1])
+      end
 
-      get 'api/v1/links'
-      _(last_response.status).must_equal 200
+      it 'Happy: should get list of authorized accounts' do
+        auth = EtaShare::AuthenticateAccount.call(
+          username: @account['username'],
+          password: @account['password']
+        )
 
-      result = JSON.parse last_response.body
-      _(result['data'].count).must_equal 2
+        header 'AUTHORIZATTION', "Bearer #{auth[:attributes][:auth_token]}"
+        get 'api/v1/links'
+        _(last_response.status).must_equal 200
+
+        result = JSON.parse last_response.body
+        _(result['data'].count).must_equal 2
+      end
+
+      it 'Bad: should not process for unauthorized account' do
+        header 'AUTHORIZATION', 'Bearer bad_token'
+        get 'api/v1/links'
+        _(last_response.status).must_equal 403
+
+        result = JSON.parse last_response.body
+        _(result['data']).must_be_nil
+      end
     end
 
     it 'HAPPY: should be able to get details of a single link' do
@@ -30,8 +51,8 @@ describe 'Test Link Handling' do
       _(last_response.status).must_equal 200
 
       result = JSON.parse last_response.body
-      _(result['data']['attributes']['id']).must_equal id
-      _(result['data']['attributes']['title']).must_equal existing_link['title']
+      _(result['attributes']['id']).must_equal id
+      _(result['attributes']['title']).must_equal existing_link['title']
     end
 
     it 'SAD: should return error if unknown link requested' do
@@ -62,10 +83,10 @@ describe 'Test Link Handling' do
       _(last_response.status).must_equal 201
       _(last_response.header['Location'].size).must_be :>, 0
 
-      created = JSON.parse(last_response.body)['data']['data']['attributes']
-      proj = EtaShare::Link.first
+      created = JSON.parse(last_response.body)['data']['attributes']
+      link = EtaShare::Link.first
 
-      _(created['id']).must_equal proj.id
+      _(created['id']).must_equal link.id
       _(created['title']).must_equal @link_data['title']
       _(created['description']).must_equal @link_data['description']
       _(created['is_clicked']).must_equal @link_data['is_clicked']
