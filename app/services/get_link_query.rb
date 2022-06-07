@@ -6,7 +6,7 @@ module EtaShare
     # Error for owner not accessor
     class ForbiddenError < StandardError
       def message
-        'You  are not allowed to access that link'
+        'You are not allowed to access that link'
       end
     end
 
@@ -21,8 +21,11 @@ module EtaShare
       raise NotFoundError unless link
 
       policy = LinkPolicy.new(account, link)
-
       raise ForbiddenError unless policy.can_view?
+
+      if link.one_time.to_i == 1 && link.owner != account
+        EtaShare::Link.where(identifier: link.identifier).update(is_clicked: Sequel[:is_clicked] + 1)
+      end
 
       link.full_details.merge(policies: policy.summary)
     end

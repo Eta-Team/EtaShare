@@ -21,7 +21,7 @@ module EtaShare
 
     plugin :timestamps
     plugin :whitelist_security
-    set_allowed_columns :title, :is_clicked, :description, :valid_period
+    set_allowed_columns :title, :is_clicked, :description, :valid_period, :one_time, :identifier
 
     # Secure getters and setters
     def description
@@ -40,23 +40,33 @@ module EtaShare
       self.valid_period_secure = SecureDB.encrypt(plaintext)
     end
 
-    # rubocop:disable Metrics/MethodLength
-    def to_json(options = {})
-      JSON(
-        {
-          data: {
-            type: 'link',
-            attributes: {
-              id:,
-              title:,
-              description:,
-              is_clicked:,
-              valid_period:
-            }
-          }
-        }, options
+    def to_h
+      {
+        type: 'link',
+        attributes: {
+          identifier:,
+          title:,
+          description:,
+          one_time:,
+          valid_period:,
+          owner:,
+          created_at:
+        }
+      }
+    end
+
+    def full_details
+      to_h.merge(
+        relationships: {
+          owner:,
+          accessors:,
+          files:
+        }
       )
     end
-    # rubocop:enable Metrics/MethodLength
+
+    def to_json(options = {})
+      JSON(to_h, options)
+    end
   end
 end

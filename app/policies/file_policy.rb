@@ -17,8 +17,10 @@ class FilePolicy
   end
 
   def summary
-    can_view: can_view?
-    can_delete: can_delete?
+    {
+      can_view: can_view?,
+      can_delete: can_delete?
+    }
   end
 
   private

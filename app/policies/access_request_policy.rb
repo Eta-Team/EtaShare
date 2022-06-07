@@ -7,8 +7,8 @@ module EtaShare
       @link = link
       @requestor_account = requestor_account
       @target_account = target_account
-      @requestor = requestor
-      @target = target
+      @requestor = LinkPolicy.new(requestor_account, link)
+      @target = LinkPolicy.new(target_account, link)
     end
 
     def can_invite?
@@ -16,7 +16,7 @@ module EtaShare
     end
 
     def can_remove?
-      @requestor.can_remove_accessors? && target_is_accessor?
+      @requestor.can_remove_accessors?
     end
 
     private
