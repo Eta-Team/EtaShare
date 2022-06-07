@@ -42,8 +42,8 @@ def create_files
   loop do
     file_info = file_info_each.next
     link = links_cycle.next
-    EtaShare::CreateFileForLink.call(
-      link_id: link.id, file_data: file_info
+    EtaShare::CreateFile.call(
+      account: link.owner, link:, file_data: file_info
     )
   end
 end
@@ -53,8 +53,9 @@ def add_accessors
   access_info.each do |access|
     link = EtaShare::Link.first(title: access['link_title'])
     access['accessor_email'].each do |email|
-      EtaShare::AddAccessorToLink.call(
-        email:, link_id: link.id
+      account = link.owner
+      EtaShare::AddAccessor.call(
+        account:, link:, accessor_email: email
       )
     end
   end
