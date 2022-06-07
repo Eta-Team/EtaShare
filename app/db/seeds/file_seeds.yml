@@ -1,5 +1,7 @@
 ---
 - name: "confidential.pdf"
   description: "Service contracts"
+  content: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Earum vitae adipisci laboriosam omnis, delectus reprehenderit numquam ratione impedit eum placeat saepe aliquam consequuntur iusto libero dolores rem eveniet qui minima."
 - name: "secret.pdf"
   description: "Sales receipts"
+  content: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Earum vitae adipisci laboriosam omnis, delectus reprehenderit numquam ratione impedit eum placeat saepe aliquam consequuntur iusto libero dolores rem eveniet qui minima."

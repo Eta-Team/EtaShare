@@ -1,12 +1,18 @@
-- title: "Service Contract"
+- identifier: tAUQ1Ooqysvtvydwo1sdSibz0pwryUfSgiJb5x+ksUE=
+  title: "Service Contract"
   description: "The 2022 contract between company.inc and the othercompany.inc "
   is_clicked: "1"
-  valid_period: "10"
-- title: "Sales Receipt"
+  valid_period: "2"
+  one_time: 0
+- identifier: atUmhyz5qXUZZpb1FbaSca02lBt2bn2vpM6Fs22sg50=
+  title: "Sales Receipt"
   description: "Proof of the 2020 goods sales"
   is_clicked: "0"
   valid_period: "20"
-- title: "Passport"
+  one_time: 1
+- identifier: O9WHT1Sjceo0SrIZ4VPuwDSdmo7PIzmlkJv4O40W8mA=
+  title: "Passport"
   description: "Valid Passport of Bethany"
   is_clicked: "0"
   valid_period: "20"
+  one_time: 0

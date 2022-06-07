@@ -1,7 +1,10 @@
 ---
 - name: passport.pdf
   description: personal information
+  content: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Earum vitae adipisci laboriosam omnis, delectus reprehenderit numquam ratione impedit eum placeat saepe aliquam consequuntur iusto libero dolores rem eveniet qui minima."
 - name: sales.pdf
   description: sales receipts
+  content: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Earum vitae adipisci laboriosam omnis, delectus reprehenderit numquam ratione impedit eum placeat saepe aliquam consequuntur iusto libero dolores rem eveniet qui minima."
 - name: contract.pdf
   description: Service contract
+  content: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Earum vitae adipisci laboriosam omnis, delectus reprehenderit numquam ratione impedit eum placeat saepe aliquam consequuntur iusto libero dolores rem eveniet qui minima."

@@ -13,7 +13,7 @@ module EtaShare
 
     plugin :timestamps
     plugin :whitelist_security
-    set_allowed_columns :name, :description
+    set_allowed_columns :name, :description, :content
 
     # Secure getters and setters
     def description
@@ -22,6 +22,14 @@ module EtaShare
 
     def description=(plaintext)
       self.description_secure = SecureDB.encrypt(plaintext)
+    end
+
+    def content
+      SecureDB.decrypt(content_secure)
+    end
+
+    def content=(plaintext)
+      self.content_secure = SecureDB.encrypt(plaintext)
     end
 
     # rubocop:disable Metrics/MethodLength
@@ -33,6 +41,7 @@ module EtaShare
             attributes: {
               id:,
               name:,
+              content:,
               description:
             }
           },
