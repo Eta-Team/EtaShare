@@ -36,14 +36,12 @@ module EtaShare
     def to_json(options = {})
       JSON(
         {
-          data: {
-            type: 'file',
-            attributes: {
-              id:,
-              name:,
-              content:,
-              description:
-            }
+          type: 'file',
+          attributes: {
+            id:,
+            name:,
+            content:,
+            description:
           },
           included: {
             link:

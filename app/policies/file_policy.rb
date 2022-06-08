@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Policy to determine if account can view a link
-
+# Policy to determine if account can view a file
 class FilePolicy
   def initialize(account, file)
     @account = account
