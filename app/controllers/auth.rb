@@ -10,6 +10,7 @@ module EtaShare
       routing.on 'register' do
         # POST api/v1/auth/register
         routing.post do
+          binding.pry
           reg_data = JsonRequestBody.parse_symbolize(request.body.read)
           VerifyRegistration.new(reg_data).call
 
