@@ -71,10 +71,10 @@ namespace :db do
 
   desc 'Delete dev or test database file'
   task drop: :load do
-    # if @app.environment == :production
-    #   puts 'Cannot wipe production database!'
-    #   return
-    # end
+    if @app.environment == :production
+      puts 'Cannot wipe production database!'
+      return
+    end
 
     db_filename = "app/db/store/#{EtaShare::Api.environment}.db"
     FileUtils.rm(db_filename)
