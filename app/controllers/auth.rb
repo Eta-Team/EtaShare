@@ -46,7 +46,6 @@ module EtaShare
         puts e.backtrace
         routing.halt 400
       end
-
     end
   end
 end

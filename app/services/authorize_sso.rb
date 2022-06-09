@@ -21,7 +21,7 @@ module EtaShare
       raise unless g_response.status == 200
 
       account = GoogleAccount.new(JSON.parse(g_response))
-      { username: account.username, email: account.email }
+      { username: account.username, email: account.email, picture: account.picture }
     end
 
     def find_or_create_sso_account(account_data)
