@@ -45,6 +45,10 @@ class AuthToken
     expired? ? raise(ExpiredTokenError) : @payload
   end
 
+  def scope
+    expired? ? raise(ExpiredTokenError) : @scope
+  end
+
   def to_s = @token
 
   # Create a token from a Hash payload
