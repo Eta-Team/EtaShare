@@ -1,11 +1,19 @@
 # frozen_string_literal: true
 
 module EtaShare
-  # Service object to create a new link for a sender
+  # Service object to create a new link for an owner
   class CreateLinkForOwner
-    def self.call(owner_id:, link_data:)
-      Account.find(id: owner_id)
-             .add_owned_link(link_data)
+    # Error for owner cannot create new link
+    class ForbiddenError < StandardError
+      def message
+        'You are not allowed to create a new link'
+      end
+    end
+
+    def self.call(auth:, link_data:)
+      raise ForbiddenError unless auth[:scope].can_write?('links')
+
+      auth[:account].add_owned_link(link_data)
     end
   end
 end

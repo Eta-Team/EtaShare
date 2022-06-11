@@ -10,12 +10,13 @@ module EtaShare
       end
     end
 
-    def self.call(req_username:, accessor_email:, link_id:)
-      account = Account.first(username: req_username)
+    def self.call(auth:, accessor_email:, link_id:)
       link = Link.first(identifier: link_id)
       accessor = Account.first(email: accessor_email)
 
-      policy = AccessRequestPolicy.new(link, account, accessor)
+      policy = AccessRequestPolicy.new(
+        link, auth[:account], accessor, auth[:scope]
+      )
       raise ForbiddenError unless policy.can_remove?
 
       link.remove_accessor(accessor)

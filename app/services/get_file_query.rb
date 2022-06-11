@@ -18,10 +18,10 @@ module EtaShare
     end
 
     # File for given requestor account
-    def self.call(requestor:, file:)
+    def self.call(auth:, file:)
       raise NotFoundError unless file
 
-      policy = FilePolicy.new(requestor, file)
+      policy = FilePolicy.new(auth[:account], file, auth[:scope])
       raise ForbiddenError unless policy.can_view?
 
       file
