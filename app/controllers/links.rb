@@ -60,24 +60,44 @@ module EtaShare
 
         routing.on('files') do
           # POST api/v1/links/[link_id]/files
-          @file_route = "#{@api_root}/links/#{link_id}/files"
-          routing.post do
-            new_file = CreateFile.call(
-              auth: @auth,
-              link: @req_link,
-              file_data: JSON.parse(routing.body.read)
-            )
+          routing.is do
+            @file_route = "#{@api_root}/links/#{link_id}/files"
+            routing.post do
+              new_file = CreateFile.call(
+                auth: @auth,
+                link: @req_link,
+                file_data: JSON.parse(routing.body.read)
+              )
 
-            response.status = 201
-            response['Location'] = "#{@file_route}/#{new_file.id}"
-            { message: 'File saved', data: new_file }.to_json
-          rescue CreateFile::ForbiddenError => e
-            routing.halt 403, { message: e.message }.to_json
-          rescue CreateFile::IllegalRequestError => e
-            routing.halt 400, { message: e.message }.to_json
-          rescue StandardError => e
-            Api.logger.warn "Could not create file: #{e.message}"
-            routing.halt 500, { message: 'API server error' }.to_json
+              response.status = 201
+              response['Location'] = "#{@file_route}/#{new_file.id}"
+              { message: 'File saved', data: new_file }.to_json
+            rescue CreateFile::ForbiddenError => e
+              routing.halt 403, { message: e.message }.to_json
+            rescue CreateFile::IllegalRequestError => e
+              routing.halt 400, { message: e.message }.to_json
+            rescue StandardError => e
+              Api.logger.warn "Could not create file: #{e.message}"
+              routing.halt 500, { message: 'API server error' }.to_json
+            end
+          end
+
+          routing.on(String) do |file_id|
+            routing.delete do
+              file = File.first(id: file_id)
+              DeleteFileQuery.call(
+                auth: @auth,
+                link: @req_link,
+                file:
+              )
+              response.status = 200
+              response['Location'] = @link_route
+              { message: 'Successfully Deleted' }.to_json
+            rescue DeleteFileQuery::ForbiddenError => e
+              routing.halt 403, { message: e.message }.to_json
+            rescue StandardError
+              routing.halt 500, { message: 'API server error' }.to_json
+            end
           end
         end
 

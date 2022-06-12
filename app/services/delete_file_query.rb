@@ -17,9 +17,9 @@ module EtaShare
       end
     end
 
-    def self.call(account:, link:, file:)
+    def self.call(auth:, link:, file:)
       # binding.pry
-      policy = LinkPolicy.new(account, link)
+      policy = LinkPolicy.new(auth[:account], link, auth[:scope])
       raise ForbiddenError unless policy.can_remove_files?
 
       link.remove_file(file)
