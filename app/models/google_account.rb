@@ -8,7 +8,8 @@ module EtaShare
     end
 
     def username
-      "#{@g_account['name']}@google"
+      name = @g_account['name'].to_s.force_encoding('UTF-8')
+      "#{name}@google"
     end
 
     def email

@@ -32,7 +32,7 @@ module EtaShare
           auth_account = AuthenticateAccount.call(credentials)
           { data: auth_account }.to_json
         rescue AuthenticateAccount::UnauthorizedError
-          routing.halt '403', { message: 'Invalid credentials' }.to_json
+          routing.halt '401', { message: 'Invalid credentials' }.to_json
         end
       end
 
