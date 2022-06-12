@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require './app/controllers/helpers'
+include EtaShare::SecureRequestHelpers
+
 Sequel.seed(:development) do
   def run
     puts 'Seeding accounts, links, files'
@@ -25,13 +28,11 @@ def create_accounts
 end
 
 def create_owned_links
-  OWNER_INFO.each do |sender|
-    account = EtaShare::Account.first(username: sender['username'])
-    sender['link_title'].each do |link_title|
+  OWNER_INFO.each do |owner|
+    account = EtaShare::Account.first(username: owner['username'])
+    owner['link_title'].each do |link_title|
       link_data = LINK_INFO.find { |link| link['title'] == link_title }
-      EtaShare::CreateLinkForOwner.call(
-        owner_id: account.id, link_data:
-      )
+      account.add_owned_link(link_data)
     end
   end
 end
@@ -42,8 +43,11 @@ def create_files
   loop do
     file_info = file_info_each.next
     link = links_cycle.next
+    auth_token = AuthToken.create(link.owner)
+    auth = scoped_auth(auth_token)
+
     EtaShare::CreateFile.call(
-      account: link.owner, link:, file_data: file_info
+      auth:, link:, file_data: file_info
     )
   end
 end
@@ -52,10 +56,13 @@ def add_accessors
   access_info = ACCESSOR_INFO
   access_info.each do |access|
     link = EtaShare::Link.first(title: access['link_title'])
+
+    auth_token = AuthToken.create(link.owner)
+    auth = scoped_auth(auth_token)
+
     access['accessor_email'].each do |email|
-      account = link.owner
       EtaShare::AddAccessor.call(
-        account:, link:, accessor_email: email
+        auth:, link:, accessor_email: email
       )
     end
   end

@@ -3,25 +3,26 @@
 module EtaShare
   # Policy to determine if an account can view a particular link
   class LinkPolicy
-    def initialize(account, link)
+    def initialize(account, link, auth_scope = nil)
       @account = account
       @link = link
+      @auth_scope = auth_scope
     end
 
     def can_view?
-      return true if account_is_owner? && link_is_valid?
-      return true if account_is_accessor? && link_is_valid? && not_one_time?
-      return true if account_is_accessor? && link_is_valid? && one_time? && not_clicked?
+      return true if can_read? && (account_is_owner? && link_is_valid?)
+      return true if can_read? && (account_is_accessor? && link_is_valid? && not_one_time?)
+      return true if can_read? && (account_is_accessor? && link_is_valid? && one_time? && not_clicked?)
 
       false
     end
 
     def can_edit?
-      account_is_owner?
+      can_write? && account_is_owner?
     end
 
     def can_delete?
-      account_is_owner?
+      can_write? && account_is_owner?
     end
 
     def can_leave?
@@ -29,22 +30,22 @@ module EtaShare
     end
 
     def can_add_files?
-      account_is_owner?
+      can_write? && account_is_owner?
     end
 
     def can_remove_files?
-      account_is_owner?
+      can_write? && account_is_owner?
     end
 
     def can_add_accessors?
-      return true if account_is_owner? && not_one_time?
-      return true if account_is_owner? && one_time? && @link.accessors.count < 1
+      return true if can_write? && (account_is_owner? && not_one_time?)
+      return true if can_write? && (account_is_owner? && one_time? && @link.accessors.count < 1)
 
       false
     end
 
     def can_remove_accessors?
-      account_is_owner? && not_one_time?
+      can_write? && (account_is_owner? && not_one_time?)
     end
 
     def can_access?
@@ -66,6 +67,14 @@ module EtaShare
     end
 
     private
+
+    def can_read?
+      @auth_scope ? @auth_scope.can_read?('links') : false
+    end
+
+    def can_write?
+      @auth_scope ? @auth_scope.can_write?('links') : false
+    end
 
     def account_is_owner?
       @link.owner == @account

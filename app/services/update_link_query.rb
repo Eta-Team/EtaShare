@@ -17,10 +17,10 @@ module EtaShare
       end
     end
 
-    def self.call(account:, link:, link_data:)
+    def self.call(auth:, link:, link_data:)
       raise NotFoundError unless link
 
-      policy = LinkPolicy.new(account, link)
+      policy = LinkPolicy.new(auth[:account], link, auth[:scope])
       raise ForbiddenError unless policy.can_edit?
 
       update_link(link, link_data)

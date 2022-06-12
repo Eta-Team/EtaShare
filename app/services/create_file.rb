@@ -17,8 +17,8 @@ module EtaShare
       end
     end
 
-    def self.call(account:, link:, file_data:)
-      policy = LinkPolicy.new(account, link)
+    def self.call(auth:, link:, file_data:)
+      policy = LinkPolicy.new(auth[:account], link, auth[:scope])
       raise ForbiddenError unless policy.can_add_files?
 
       add_file(link, file_data)

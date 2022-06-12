@@ -2,17 +2,18 @@
 
 # Policy to determine if account can view a file
 class FilePolicy
-  def initialize(account, file)
+  def initialize(account, file, auth_scope = nil)
     @account = account
     @file = file
+    @auth_scope = auth_scope
   end
 
   def can_view?
-    account_owns_link? || account_has_access_to_link?
+    can_read? && (account_owns_link? || account_has_access_to_link?)
   end
 
   def can_delete?
-    account_owns_link?
+    can_write? && account_owns_link?
   end
 
   def summary
@@ -23,6 +24,14 @@ class FilePolicy
   end
 
   private
+
+  def can_read?
+    @auth_scope ? @auth_scope.can_read?('files') : false
+  end
+
+  def can_write?
+    @auth_scope ? @auth_scope.can_write?('files') : false
+  end
 
   def account_owns_link?
     @file.link.owner == @account

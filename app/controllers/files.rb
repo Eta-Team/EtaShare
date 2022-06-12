@@ -16,7 +16,7 @@ module EtaShare
 
         routing.get do
           file = GetFileQuery.call(
-            requestor: @auth_account, file: @req_file
+            auth: @auth, file: @req_file
           )
 
           { data: file }.to_json
@@ -25,7 +25,7 @@ module EtaShare
         rescue GetFileQuery::NotFoundError => e
           routing.halt 404, { message: e.message }.to_json
         rescue StandardError => e
-          puts "GET DOCUMENT ERROR: #{e.inspect}"
+          Api.logger.warn "File Error: #{e.inspect}"
           routing.halt 500, { message: 'API server error' }.to_json
         end
       end

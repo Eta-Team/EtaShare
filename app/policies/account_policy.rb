@@ -7,15 +7,15 @@ class AccountPolicy
     @account = account
   end
 
-  def can_view
+  def can_view?
     self_request?
   end
 
-  def can_edit
+  def can_edit?
     self_request?
   end
 
-  def can_delete
+  def can_delete?
     self_request?
   end
 

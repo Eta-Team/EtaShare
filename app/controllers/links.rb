@@ -6,19 +6,17 @@ module EtaShare
   # Links Web controller for EtaShare API
   class Api < Roda
     route('links') do |routing|
-      unauthorized_message = { message: 'Unauthorized Request' }.to_json
-      routing.halt(403, unauthorized_message) unless @auth_account
+      routing.halt(403, UNAUTH_MSG) unless @auth_account
 
       @link_route = "#{@api_root}/links"
 
       routing.on String do |link_id|
         @req_link = Link.first(identifier: link_id)
-        # GET api/v1/links/[ID]
-        # binding.pry
 
+        # GET api/v1/links/[ID]
         routing.get do
           link = GetLinkQuery.call(
-            account: @auth_account, link: @req_link
+            auth: @auth, link: @req_link
           )
 
           { data: link }.to_json
@@ -36,7 +34,7 @@ module EtaShare
             link_data = JSON.parse(routing.body.read)
             # binding.pry
             link = UpdateLinkQuery.call(
-              account: @auth_account,
+              auth: @auth,
               link: @req_link,
               link_data:
             )
@@ -47,7 +45,7 @@ module EtaShare
 
           routing.delete do
             DeleteLinkQuery.call(
-              account: @auth_account,
+              auth: @auth,
               link: @req_link
             )
             response.status = 200
@@ -62,24 +60,44 @@ module EtaShare
 
         routing.on('files') do
           # POST api/v1/links/[link_id]/files
-          @file_route = "#{@api_root}/links/#{link_id}/files"
-          routing.post do
-            new_file = CreateFile.call(
-              account: @auth_account,
-              link: @req_link,
-              file_data: JSON.parse(routing.body.read)
-            )
+          routing.is do
+            @file_route = "#{@api_root}/links/#{link_id}/files"
+            routing.post do
+              new_file = CreateFile.call(
+                auth: @auth,
+                link: @req_link,
+                file_data: JSON.parse(routing.body.read)
+              )
 
-            response.status = 201
-            response['Location'] = "#{@file_route}/#{new_file.id}"
-            { message: 'File saved', data: new_file }.to_json
-          rescue CreateFile::ForbiddenError => e
-            routing.halt 403, { message: e.message }.to_json
-          rescue CreateFile::IllegalRequestError => e
-            routing.halt 400, { message: e.message }.to_json
-          rescue StandardError => e
-            Api.logger.warn "Could not create file: #{e.message}"
-            routing.halt 500, { message: 'API server error' }.to_json
+              response.status = 201
+              response['Location'] = "#{@file_route}/#{new_file.id}"
+              { message: 'File saved', data: new_file }.to_json
+            rescue CreateFile::ForbiddenError => e
+              routing.halt 403, { message: e.message }.to_json
+            rescue CreateFile::IllegalRequestError => e
+              routing.halt 400, { message: e.message }.to_json
+            rescue StandardError => e
+              Api.logger.warn "Could not create file: #{e.message}"
+              routing.halt 500, { message: 'API server error' }.to_json
+            end
+          end
+
+          routing.on(String) do |file_id|
+            routing.delete do
+              file = File.first(id: file_id)
+              DeleteFileQuery.call(
+                auth: @auth,
+                link: @req_link,
+                file:
+              )
+              response.status = 200
+              response['Location'] = @link_route
+              { message: 'Successfully Deleted' }.to_json
+            rescue DeleteFileQuery::ForbiddenError => e
+              routing.halt 403, { message: e.message }.to_json
+            rescue StandardError
+              routing.halt 500, { message: 'API server error' }.to_json
+            end
           end
         end
 
@@ -89,7 +107,7 @@ module EtaShare
             req_data = JSON.parse(routing.body.read)
             # binding.pry
             accessor = AddAccessor.call(
-              account: @auth_account,
+              auth: @auth,
               link: @req_link,
               accessor_email: req_data['email']
             )
@@ -104,7 +122,7 @@ module EtaShare
           routing.delete do
             req_data = JSON.parse(routing.body.read)
             accessor = RemoveAccessor.call(
-              req_username: @auth_account.username,
+              auth: @auth,
               accessor_email: req_data['email'],
               link_id:
             )
@@ -130,7 +148,10 @@ module EtaShare
         # POST api/v1/links
         routing.post do
           new_data = JSON.parse(routing.body.read)
-          new_link = @auth_account.add_owned_link(new_data)
+          new_link = CreateLinkForOwner.call(
+            auth: @auth, link_data: new_data
+          )
+          # new_link = @auth_account.add_owned_link(new_data)
 
           response.status = 201
           response['Location'] = "#{@link_route}/#{new_link.id}"
@@ -138,6 +159,8 @@ module EtaShare
         rescue Sequel::MassAssignmentRestriction
           Api.logger.warn "MASS-ASSIGNMENT: #{new_data.keys}"
           routing.halt 400, { message: 'Illegal Request' }.to_json
+        rescue CreateProjectForOwner::ForbiddenError => e
+          routing.halt 403, { message: e.message }.to_json
         rescue StandardError
           Api.logger.error "Unknown error: #{e.message}"
           routing.halt 500, { message: 'API server error' }.to_json

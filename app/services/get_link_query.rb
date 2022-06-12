@@ -17,13 +17,13 @@ module EtaShare
       end
     end
 
-    def self.call(account:, link:)
+    def self.call(auth:, link:)
       raise NotFoundError unless link
 
-      policy = LinkPolicy.new(account, link)
+      policy = LinkPolicy.new(auth[:account], link, auth[:scope])
       raise ForbiddenError unless policy.can_view?
 
-      if link.one_time.to_i == 1 && link.owner != account
+      if link.one_time.to_i == 1 && link.owner != auth[:account]
         EtaShare::Link.where(identifier: link.identifier).update(is_clicked: Sequel[:is_clicked] + 1)
       end
 

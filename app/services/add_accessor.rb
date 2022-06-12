@@ -10,12 +10,15 @@ module EtaShare
       end
     end
 
-    def self.call(account:, link:, accessor_email:)
+    def self.call(auth:, link:, accessor_email:)
       invitee = Account.first(email: accessor_email)
-      policy  = AccessRequestPolicy.new(link, account, invitee)
+      policy  = AccessRequestPolicy.new(
+        link, auth[:account], invitee, auth[:scope]
+      )
       raise ForbiddenError unless policy.can_invite?
 
       link.add_accessor(invitee)
+      # invitee
     end
   end
 end
