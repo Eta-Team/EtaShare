@@ -14,10 +14,12 @@ module EtaShare
       raise ForbiddenError unless auth[:scope].can_write?('links')
 
       identifier = SecureDB.generate_key.tr('/', '-')
+      # link_data['identifier'] = identifier
+      # auth[:account].add_owned_link(link_data)
       link = Link.create(identifier:,
                          title: link_data['title'],
-                         description_secure: SecureDB.encrypt(description),
-                         valid_period_secure: SecureDB.encrypt(valid))
+                         description_secure: SecureDB.encrypt(link_data['description']),
+                         valid_period_secure: SecureDB.encrypt(link_data['valid']))
       auth[:account].add_owned_link(link)
     end
   end
