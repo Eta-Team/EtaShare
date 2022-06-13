@@ -12,11 +12,17 @@ require_relative 'auth_scope'
 class AuthToken
   extend Securable
 
-  ONE_HOUR = 60 * 60
-  ONE_DAY = ONE_HOUR * 24
-  ONE_WEEK = ONE_DAY * 7
-  ONE_MONTH = ONE_WEEK * 4
-  ONE_YEAR = ONE_MONTH * 12
+  # ONE_HOUR = 60 * 60
+  # ONE_DAY = ONE_HOUR * 24
+  # ONE_WEEK = ONE_DAY * 7
+  # ONE_MONTH = ONE_WEEK * 4
+  # ONE_YEAR = ONE_MONTH * 12
+
+  ONE_HOUR = 1
+  ONE_DAY = ONE_HOUR([1])
+  ONE_WEEK = ONE_DAY * 1
+  ONE_MONTH = ONE_WEEK * 1
+  ONE_YEAR = ONE_MONTH * 1
 
   class ExpiredTokenError < StandardError; end
   class InvalidTokenError < StandardError; end
