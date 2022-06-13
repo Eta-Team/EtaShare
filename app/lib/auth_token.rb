@@ -19,7 +19,7 @@ class AuthToken
   # ONE_YEAR = ONE_MONTH * 12
 
   ONE_HOUR = 1
-  ONE_DAY = ONE_HOUR([1])
+  ONE_DAY = ONE_HOUR
   ONE_WEEK = ONE_DAY * 1
   ONE_MONTH = ONE_WEEK * 1
   ONE_YEAR = ONE_MONTH * 1
