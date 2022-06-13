@@ -14,7 +14,7 @@ module EtaShare
         routing.halt(403, UNAUTH_MSG) unless @auth_account
         routing.get do
           auth = AuthorizeAccount.call(
-            auth: @auth, username:,
+            auth: @auth, username: Base64.strict_decode64(username),
             auth_scope: AuthScope.new(AuthScope::READ_ONLY)
           )
           { data: auth }.to_json
