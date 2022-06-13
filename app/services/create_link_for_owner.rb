@@ -15,6 +15,7 @@ module EtaShare
 
       identifier = SecureDB.generate_key.tr('/', '-')
       link_data['identifier'] = identifier
+      puts(link_data)
       auth[:account].add_owned_link(link_data)
     end
   end
