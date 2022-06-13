@@ -159,7 +159,7 @@ module EtaShare
         rescue Sequel::MassAssignmentRestriction
           Api.logger.warn "MASS-ASSIGNMENT: #{new_data.keys}"
           routing.halt 400, { message: 'Illegal Request' }.to_json
-        rescue CreateProjectForOwner::ForbiddenError => e
+        rescue CreateLinkForOwner::ForbiddenError => e
           routing.halt 403, { message: e.message }.to_json
         rescue StandardError
           Api.logger.error "Unknown error: #{e.message}"
