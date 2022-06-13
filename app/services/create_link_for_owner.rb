@@ -16,10 +16,11 @@ module EtaShare
       identifier = SecureDB.generate_key.tr('/', '-')
       # link_data['identifier'] = identifier
       # auth[:account].add_owned_link(link_data)
-      link = Link.create(identifier: 'lol',
+      link = Link.create(identifier:,
                          title: link_data['title'],
                          description_secure: SecureDB.encrypt(link_data['description']),
-                         valid_period_secure: SecureDB.encrypt(link_data['valid']))
+                         valid_period_secure: SecureDB.encrypt(link_data['valid']),
+                         is_clicked: '0')
       auth[:account].add_owned_link(link)
     end
   end
