@@ -152,7 +152,6 @@ module EtaShare
             auth: @auth, link_data: new_data
           )
           # new_link = @auth_account.add_owned_link(new_data)
-
           response.status = 201
           response['Location'] = "#{@link_route}/#{new_link.id}"
           { message: 'Link saved', data: new_link }.to_json
@@ -161,7 +160,7 @@ module EtaShare
           routing.halt 400, { message: 'Illegal Request' }.to_json
         rescue CreateLinkForOwner::ForbiddenError => e
           routing.halt 403, { message: e.message }.to_json
-        rescue StandardError
+        rescue StandardError => e
           Api.logger.error "Unknown error: #{e.message}"
           routing.halt 500, { message: 'API server error' }.to_json
         end
