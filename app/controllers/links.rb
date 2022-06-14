@@ -101,6 +101,24 @@ module EtaShare
           end
         end
 
+        routing.on('forfeit') do
+          routing.is do
+            routing.delete do
+              ForfeitAccessQuery.call(
+                auth: @auth,
+                link: @req_link
+              )
+              response.status = 200
+              response['Location'] = @link_route
+              { message: 'Successfully Forfeited Access' }.to_json
+            rescue ForfeitAccessQuery::ForbiddenError => e
+              routing.halt 403, { message: e.message }.to_json
+            rescue StandardError
+              routing.halt 500, { message: 'API server error' }.to_json
+            end
+          end
+        end
+
         routing.on('accessors') do
           # PUT api/v1/links/[link_id]/accessors
           routing.put do
