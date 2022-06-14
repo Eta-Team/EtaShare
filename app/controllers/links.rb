@@ -101,6 +101,24 @@ module EtaShare
           end
         end
 
+        routing.on('forfeit') do
+          routing.is do
+            routing.delete do
+              ForfeitAccessQuery.call(
+                auth: @auth,
+                link: @req_link
+              )
+              response.status = 200
+              response['Location'] = @link_route
+              { message: 'Successfully Forfeited Access' }.to_json
+            rescue ForfeitAccessQuery::ForbiddenError => e
+              routing.halt 403, { message: e.message }.to_json
+            rescue StandardError
+              routing.halt 500, { message: 'API server error' }.to_json
+            end
+          end
+        end
+
         routing.on('accessors') do
           # PUT api/v1/links/[link_id]/accessors
           routing.put do
@@ -152,16 +170,15 @@ module EtaShare
             auth: @auth, link_data: new_data
           )
           # new_link = @auth_account.add_owned_link(new_data)
-
           response.status = 201
           response['Location'] = "#{@link_route}/#{new_link.id}"
           { message: 'Link saved', data: new_link }.to_json
         rescue Sequel::MassAssignmentRestriction
           Api.logger.warn "MASS-ASSIGNMENT: #{new_data.keys}"
           routing.halt 400, { message: 'Illegal Request' }.to_json
-        rescue CreateProjectForOwner::ForbiddenError => e
+        rescue CreateLinkForOwner::ForbiddenError => e
           routing.halt 403, { message: e.message }.to_json
-        rescue StandardError
+        rescue StandardError => e
           Api.logger.error "Unknown error: #{e.message}"
           routing.halt 500, { message: 'API server error' }.to_json
         end

@@ -24,7 +24,7 @@ module EtaShare
       raise ForbiddenError unless policy.can_view?
 
       if link.one_time.to_i == 1 && link.owner != auth[:account]
-        EtaShare::Link.where(identifier: link.identifier).update(is_clicked: Sequel[:is_clicked] + 1)
+        EtaShare::Link.where(identifier: link.identifier).update(is_clicked: 1)
       end
 
       link.full_details.merge(policies: policy.summary)
