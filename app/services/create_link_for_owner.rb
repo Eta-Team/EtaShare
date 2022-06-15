@@ -13,6 +13,9 @@ module EtaShare
     def self.call(auth:, link_data:)
       raise ForbiddenError unless auth[:scope].can_write?('links')
 
+      identifier = SecureDB.generate_key.tr('/', '-')
+      link_data['identifier'] = identifier
+      puts "ETASHARE-API #{link_data}"
       auth[:account].add_owned_link(link_data)
     end
   end

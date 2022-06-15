@@ -60,24 +60,62 @@ module EtaShare
 
         routing.on('files') do
           # POST api/v1/links/[link_id]/files
-          @file_route = "#{@api_root}/links/#{link_id}/files"
-          routing.post do
-            new_file = CreateFile.call(
-              auth: @auth,
-              link: @req_link,
-              file_data: JSON.parse(routing.body.read)
-            )
+          routing.is do
+            @file_route = "#{@api_root}/links/#{link_id}/files"
+            routing.post do
+              new_file = CreateFile.call(
+                auth: @auth,
+                link: @req_link,
+                file_data: JSON.parse(routing.body.read)
+              )
 
-            response.status = 201
-            response['Location'] = "#{@file_route}/#{new_file.id}"
-            { message: 'File saved', data: new_file }.to_json
-          rescue CreateFile::ForbiddenError => e
-            routing.halt 403, { message: e.message }.to_json
-          rescue CreateFile::IllegalRequestError => e
-            routing.halt 400, { message: e.message }.to_json
-          rescue StandardError => e
-            Api.logger.warn "Could not create file: #{e.message}"
-            routing.halt 500, { message: 'API server error' }.to_json
+              response.status = 201
+              response['Location'] = "#{@file_route}/#{new_file.id}"
+              { message: 'File saved', data: new_file }.to_json
+            rescue CreateFile::ForbiddenError => e
+              routing.halt 403, { message: e.message }.to_json
+            rescue CreateFile::IllegalRequestError => e
+              routing.halt 400, { message: e.message }.to_json
+            rescue StandardError => e
+              Api.logger.warn "Could not create file: #{e.message}"
+              routing.halt 500, { message: 'API server error' }.to_json
+            end
+          end
+
+          routing.on(String) do |file_id|
+            routing.delete do
+              file = File.first(id: file_id)
+              DeleteFileQuery.call(
+                auth: @auth,
+                link: @req_link,
+                file:
+              )
+              response.status = 200
+              response['Location'] = @link_route
+              { message: 'Successfully Deleted' }.to_json
+            rescue DeleteFileQuery::ForbiddenError => e
+              routing.halt 403, { message: e.message }.to_json
+            rescue StandardError
+              routing.halt 500, { message: 'API server error' }.to_json
+            end
+          end
+        end
+
+        routing.on('forfeit') do
+          routing.is do
+            routing.delete do
+              ForfeitAccessQuery.call(
+                auth: @auth,
+                link: @req_link
+              )
+              response.status = 200
+              response['Location'] = @link_route
+              { message: 'Successfully Forfeited Access' }.to_json
+            rescue ForfeitAccessQuery::ForbiddenError => e
+              routing.halt 403, { message: e.message }.to_json
+            rescue StandardError
+              routing.halt 500, { message: 'API server error' }.to_json
+            end
           end
         end
 
@@ -132,16 +170,15 @@ module EtaShare
             auth: @auth, link_data: new_data
           )
           # new_link = @auth_account.add_owned_link(new_data)
-
           response.status = 201
           response['Location'] = "#{@link_route}/#{new_link.id}"
           { message: 'Link saved', data: new_link }.to_json
         rescue Sequel::MassAssignmentRestriction
           Api.logger.warn "MASS-ASSIGNMENT: #{new_data.keys}"
           routing.halt 400, { message: 'Illegal Request' }.to_json
-        rescue CreateProjectForOwner::ForbiddenError => e
+        rescue CreateLinkForOwner::ForbiddenError => e
           routing.halt 403, { message: e.message }.to_json
-        rescue StandardError
+        rescue StandardError => e
           Api.logger.error "Unknown error: #{e.message}"
           routing.halt 500, { message: 'API server error' }.to_json
         end
