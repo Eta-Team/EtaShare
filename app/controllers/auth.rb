@@ -41,7 +41,7 @@ module EtaShare
       end
 
       routing.post 'sso' do
-        auth_account = AuthorizeSso.new.call(@request_data[:access_token])
+        auth_account = AuthorizeSso.new(Api.config).call(@request_data[:id_token])
         { data: auth_account }.to_json
       rescue StandardError => e
         puts "FAILED to validate Google account: #{e.inspect}"
