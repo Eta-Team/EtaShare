@@ -7,24 +7,25 @@ describe 'Test Link Handling' do
 
   before do
     wipe_database
+
+    @account_data = DATA[:accounts][0]
+    @wrong_account_data = DATA[:accounts][1]
+
+    @account = EtaShare::Account.create(@account_data)
+    @wrong_account = EtaShare::Account.create(@wrong_account_data)
+
+    header 'CONTENT_TYPE', 'application/json'
   end
 
   describe 'Getting links' do
     describe 'Getting list of all links' do
       before do
-        @account_data = DATA[:accounts][0]
-        account = EtaShare::Account.create(@account_data)
-        account.add_owned_link(DATA[:links][0])
-        account.add_owned_link(DATA[:links][1])
+        @account.add_owned_link(DATA[:links][0])
+        @account.add_owned_link(DATA[:links][1])
       end
 
       it 'Happy: should get list of authorized accounts' do
-        auth = EtaShare::AuthenticateAccount.call(
-          username: @account['username'],
-          password: @account['password']
-        )
-
-        header 'AUTHORIZATTION', "Bearer #{auth[:attributes][:auth_token]}"
+        header 'AUTHORIZATION', auth_header(@account_data)
         get 'api/v1/links'
         _(last_response.status).must_equal 200
 
@@ -33,7 +34,6 @@ describe 'Test Link Handling' do
       end
 
       it 'Bad: should not process for unauthorized account' do
-        header 'AUTHORIZATION', 'Bearer bad_token'
         get 'api/v1/links'
         _(last_response.status).must_equal 403
 
@@ -43,27 +43,40 @@ describe 'Test Link Handling' do
     end
 
     it 'HAPPY: should be able to get details of a single link' do
-      existing_link = DATA[:links][1]
-      EtaShare::Link.create(existing_link)
-      id = EtaShare::Link.first.id
+      link = @account.add_owned_link(DATA[:links][0])
 
-      get "/api/v1/links/#{id}"
+      header 'AUTHORIZATION', auth_header(@account_data)
+      get "/api/v1/links/#{link.identifier}"
       _(last_response.status).must_equal 200
 
-      result = JSON.parse last_response.body
-      _(result['attributes']['id']).must_equal id
-      _(result['attributes']['title']).must_equal existing_link['title']
+      result = JSON.parse(last_response.body)['data']
+      _(result['attributes']['identifier']).must_equal link.identifier
+      _(result['attributes']['title']).must_equal link.title
     end
 
     it 'SAD: should return error if unknown link requested' do
+      header 'AUTHORIZATION', auth_header(@account_data)
       get '/api/v1/links/foobar'
 
       _(last_response.status).must_equal 404
     end
 
+    it 'BAD AUTHORIZATION: should not get link with wrong authorization' do
+      link = @account.add_owned_link(DATA[:links][0])
+
+      header 'AUTHORIZATION', auth_header(@wrong_account_data)
+      get "/api/v1/links/#{link.identifier}"
+      _(last_response.status).must_equal 403
+
+      result = JSON.parse last_response.body
+      _(result['attributes']).must_be_nil
+    end
+
     it 'SECURITY: should prevent basic SQL injection targeting IDs' do
-      EtaShare::Link.create(title: 'New Link')
-      EtaShare::Link.create(title: 'Newer Link')
+      @account.add_owned_link(DATA[:links][0])
+      @account.add_owned_link(DATA[:links][1])
+
+      header 'AUTHORIZATION', auth_header(@account_data)
       get 'api/v1/links/2%20or%20id%3E0'
 
       # deliberately not reporting error -- don't give attacker information
@@ -74,29 +87,42 @@ describe 'Test Link Handling' do
 
   describe 'Creating New Links' do
     before do
-      @req_header = { 'CONTENT_TYPE' => 'application/json' }
       @link_data = DATA[:links][1]
     end
 
     it 'HAPPY: should be able to create new links' do
-      post 'api/v1/links', @link_data.to_json, @req_header
+      header 'AUTHORIZATION', auth_header(@account_data)
+      post 'api/v1/links', @link_data.to_json
+
       _(last_response.status).must_equal 201
       _(last_response.header['Location'].size).must_be :>, 0
 
       created = JSON.parse(last_response.body)['data']['attributes']
       link = EtaShare::Link.first
 
-      _(created['id']).must_equal link.id
+      _(created['identifier']).must_equal link.identifier
       _(created['title']).must_equal @link_data['title']
       _(created['description']).must_equal @link_data['description']
-      _(created['is_clicked']).must_equal @link_data['is_clicked']
       _(created['valid_period']).must_equal @link_data['valid_period']
+      _(created['one_time'].to_i).must_equal @link_data['one_time'].to_i
+    end
+
+    it 'SAD: should not create new link without authorization' do
+      post 'api/v1/links', @proj_data.to_json
+
+      created = JSON.parse(last_response.body)['data']
+
+      _(last_response.status).must_equal 403
+      _(last_response.header['Location']).must_be_nil
+      _(created).must_be_nil
     end
 
     it 'SECURITY: should not create link with mass assignment' do
       bad_data = @link_data.clone
       bad_data['created_at'] = '1900-01-01'
-      post 'api/v1/links', bad_data.to_json, @req_header
+
+      header 'AUTHORIZATION', auth_header(@account_data)
+      post 'api/v1/links', bad_data.to_json
 
       _(last_response.status).must_equal 400
       _(last_response.header['Location']).must_be_nil
