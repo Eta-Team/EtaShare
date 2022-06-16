@@ -24,7 +24,8 @@ module EtaShare
 
     def self.create_google_account(google_account)
       create(username: google_account[:username],
-             email: google_account[:email])
+             email: google_account[:email],
+             picture: google_account[:picture])
     end
 
     def links
