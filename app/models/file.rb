@@ -32,7 +32,6 @@ module EtaShare
       self.content_secure = SecureDB.encrypt(plaintext)
     end
 
-    # rubocop:disable Metrics/MethodLength
     def to_json(options = {})
       JSON(
         {
@@ -49,6 +48,5 @@ module EtaShare
         }, options
       )
     end
-    # rubocop:enable Metrics/MethodLength
   end
 end

@@ -21,7 +21,7 @@ module EtaShare
       # binding.pry
       policy = LinkPolicy.new(auth[:account], link, auth[:scope])
       raise ForbiddenError unless policy.can_leave?
-      
+
       link.remove_accessor(auth[:account])
     end
   end
