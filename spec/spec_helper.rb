@@ -14,6 +14,28 @@ def wipe_database
   EtaShare::Account.map(&:destroy)
 end
 
+def authenticate(account_data)
+  EtaShare::AuthenticateAccount.call(
+    username: account_data['username'],
+    password: account_data['password']
+  )
+end
+
+def auth_header(account_data)
+  auth = authenticate(account_data)
+
+  "Bearer #{auth[:attributes][:auth_token]}"
+end
+
+def authorization(account_data)
+  auth = authenticate(account_data)
+
+  token = AuthToken.new(auth[:attributes][:auth_token])
+  account = token.payload['attributes']
+  { account: EtaShare::Account.first(username: account['username']),
+    scope: AuthScope.new(token.scope) }
+end
+
 DATA = {
   accounts: YAML.safe_load(File.read('app/db/seeds/accounts_seed.yml')),
   files: YAML.safe_load(File.read('app/db/seeds/files_seed.yml')),
