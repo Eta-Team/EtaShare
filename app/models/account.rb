@@ -18,7 +18,7 @@ module EtaShare
            accesses: :nullify
 
     plugin :whitelist_security
-    set_allowed_columns :username, :email, :password
+    set_allowed_columns :username, :email, :password, :picture
 
     plugin :timestamps, update_on_create: true
 
@@ -47,7 +47,8 @@ module EtaShare
           type: 'account',
           attributes: {
             username:,
-            email:
+            email:,
+            picture:
           }
         }, options
       )
