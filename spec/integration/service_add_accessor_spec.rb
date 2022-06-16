@@ -12,29 +12,37 @@ describe 'Test AddAccessorToLink service' do
 
     link_data = DATA[:links].first
 
-    @sender = EtaShare::Account.all[0]
+    @owner_data = DATA[:accounts][0]
+    @owner = EtaShare::Account.all[0]
     @accessor = EtaShare::Account.all[1]
-    @link = EtaShare::CreateLinkForOwner.call(
-      owner_id: @sender.id, link_data:
-    )
+    @link = @owner.add_owned_link(link_data)
   end
 
   it 'HAPPY: should be able to add an accessor to a link' do
-    EtaShare::AddAccessorToLink.call(
-      email: @accessor.email,
-      link_id: @link.id
+    auth = authorization(@owner_data)
+
+    EtaShare::AddAccessor.call(
+      auth:,
+      link: @link,
+      accessor_email: @accessor.email
     )
 
     _(@accessor.links.count).must_equal 1
     _(@accessor.links.first).must_equal @link
   end
 
-  it 'BAD: should not add sender as an accessor' do
+  it 'BAD: should not add owner as an accessor' do
+    auth = EtaShare::AuthenticateAccount.call(
+      username: @owner_data['username'],
+      password: @owner_data['password']
+    )
+
     _(proc {
-      EtaShare::AddAccessorToLink.call(
-        email: @sender.email,
-        link_id: @link.id
+      EtaShare::AddAccessor.call(
+        auth:,
+        link: @link,
+        accessor_email: @owner.email
       )
-    }).must_raise EtaShare::AddAccessorToLink::SenderNotAccessorError
+    }).must_raise EtaShare::AddAccessor::ForbiddenError
   end
 end
