@@ -35,7 +35,6 @@ end
 
 # Debugging
 gem 'pry' # necessary for rake console
-gem 'rack-test'
 
 # Development
 group :development do

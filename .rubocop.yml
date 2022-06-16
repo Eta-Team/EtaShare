@@ -29,3 +29,6 @@ Style/SymbolArray:
   Exclude:
     - Rakefile
     - app/db/migrations/*.rb
+
+Metrics/MethodLength:
+  Max: 15
