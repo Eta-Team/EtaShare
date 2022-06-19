@@ -8,6 +8,8 @@ gem 'json'
 gem 'puma', '~>5'
 gem 'roda', '~>3'
 
+gem 'simplecov'
+
 # Configuration
 gem 'figaro', '~>1'
 gem 'rake', '~>13'
